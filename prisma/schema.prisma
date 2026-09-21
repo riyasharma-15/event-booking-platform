@@ -25,6 +25,7 @@ model User {
   role      Role      @default(ATTENDEE)
   createdAt DateTime  @default(now())
   sessions  Session[]
+  events    Event[]
 }
 
 model Session {
@@ -33,4 +34,20 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id             Int      @id @default(autoincrement())
+  title          String
+  description    String
+  date           DateTime
+  time           String
+  location       String
+  totalSeats     Int
+  availableSeats Int
+  image          String?
+  organizerId    Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organizer      User     @relation(fields: [organizerId], references: [id], onDelete: Restrict)
 }

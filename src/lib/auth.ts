@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import type { Role } from '@/generated/prisma/client'
 
 /**
  * Validates the session from the incoming Request and returns the associated User if valid.
@@ -56,4 +57,29 @@ export async function getCurrentUser(request: Request) {
 
   // 6. If the Session is valid, return the associated User
   return session.user
+}
+
+/**
+ * Validates that the requesting user is authenticated and has the required role.
+ *
+ * @param request The incoming Request object
+ * @param role The required role to check against (e.g., 'ORGANIZER' or 'ATTENDEE')
+ * @returns The User record if authenticated and role matches, otherwise null
+ */
+export async function requireRole(request: Request, role: Role) {
+  // 1. Check if there is an authenticated user
+  const user = await getCurrentUser(request)
+
+  // 2. If there is no logged-in user, return null
+  if (!user) {
+    return null
+  }
+
+  // 3. If the user is logged in but user.role does not match the required role, return null
+  if (user.role !== role) {
+    return null
+  }
+
+  // 4. If the user's role matches, return the user
+  return user
 }
