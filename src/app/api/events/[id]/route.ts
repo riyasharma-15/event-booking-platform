@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser, requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { EventStatus } from '@/generated/prisma/client'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -262,6 +263,90 @@ export async function PUT(
           updatedAt: updatedEvent.updatedAt,
         },
       },
+      { status: 200 }
+    )
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: RouteContext
+) {
+  try {
+    // 1. Authentication & Authorization: user must be an authenticated ORGANIZER
+    const user = await requireRole(request, 'ORGANIZER')
+
+    if (!user) {
+      const currentUser = await getCurrentUser(request)
+
+      if (!currentUser) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        )
+      }
+
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      )
+    }
+
+    // 2. Validate route parameter ID
+    const { id } = await context.params
+    const eventId = parseInt(id, 10)
+
+    if (!/^\d+$/.test(id) || isNaN(eventId) || eventId <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid event ID' },
+        { status: 400 }
+      )
+    }
+
+    // 3. Find the event in the database
+    const existingEvent = await prisma.event.findUnique({
+      where: { id: eventId },
+    })
+
+    if (!existingEvent) {
+      return NextResponse.json(
+        { error: 'Event not found' },
+        { status: 404 }
+      )
+    }
+
+    // 4. Ownership check: organizer may only cancel their own events
+    if (existingEvent.organizerId !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      )
+    }
+
+    // 5. Check if the event is already cancelled
+    if (existingEvent.status === EventStatus.CANCELLED) {
+      return NextResponse.json(
+        { error: 'Event is already cancelled' },
+        { status: 409 }
+      )
+    }
+
+    // 6. Cancel the event
+    await prisma.event.update({
+      where: { id: eventId },
+      data: {
+        status: EventStatus.CANCELLED,
+      },
+    })
+
+    // 7. Return success response
+    return NextResponse.json(
+      { message: 'Event cancelled successfully' },
       { status: 200 }
     )
   } catch (error: unknown) {
