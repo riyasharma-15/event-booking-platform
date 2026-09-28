@@ -2,68 +2,116 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
+    <div className="flex min-h-full flex-1 flex-col bg-[#f5f7f4] text-[#17372f]">
+      <header className="relative z-10 border-b border-[#17372f]/10 bg-[#f5f7f4]">
+        <nav
+          aria-label="Main navigation"
+          className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 sm:px-8 lg:px-12"
+        >
+          <a href="/" className="text-xl font-bold tracking-tight">
+            Event<span className="text-[#d9674e]">Book</span>
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <div className="flex items-center gap-5 text-sm font-medium sm:gap-8">
+            <a className="transition-colors hover:text-[#d9674e]" href="/events">
+              Events
+            </a>
+            <a className="transition-colors hover:text-[#d9674e]" href="/login">
+              Login
+            </a>
+            <a
+              className="rounded-md bg-[#17372f] px-4 py-2.5 text-white transition-colors hover:bg-[#285447]"
+              href="/register"
+            >
+              Register
+            </a>
+          </div>
+        </nav>
+      </header>
+
+      <main className="flex-1">
+        <section aria-labelledby="hero-title" className="bg-[#f5f7f4]">
+          <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12 lg:py-24">
+            <div className="max-w-2xl">
+              <p className="mb-5 text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
+                Make room for something memorable
+              </p>
+              <h1
+                id="hero-title"
+                className="text-4xl font-semibold leading-[1.08] sm:text-5xl lg:text-6xl"
+              >
+                Discover Events That Matter to You
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-[#53645d]">
+                Find and book conferences, workshops, concerts, sports events,
+                cultural experiences, celebrations, and more.
+              </p>
+              <a
+                className="mt-8 inline-flex min-h-12 items-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
+                href="/events"
+              >
+                Browse Events
+              </a>
+            </div>
+            <div className="relative mx-auto aspect-[4/3] w-full max-w-[34rem] overflow-hidden rounded-xl">
+              <Image
+                src="/chatgpt.png"
+                alt="A variety of events and experiences"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 45vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="why-title"
+          className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-12"
+        >
+          <div className="mb-10 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+            <h2 id="why-title" className="text-3xl font-semibold sm:text-4xl">
+              Why EventBook?
+            </h2>
+            <p className="max-w-md text-base leading-7 text-[#53645d]">
+              Good plans start with finding the right event.
+            </p>
+          </div>
+          <div className="grid gap-9 border-t border-[#17372f]/15 pt-8 sm:grid-cols-3 sm:gap-8">
+            <article>
+              <p className="mb-5 text-sm font-semibold text-[#d9674e]">01</p>
+              <h3 className="text-xl font-semibold">Discover Events</h3>
+              <p className="mt-3 max-w-sm leading-7 text-[#53645d]">
+                Explore events and find something that feels just right for you.
+              </p>
+            </article>
+            <article>
+              <p className="mb-5 text-sm font-semibold text-[#d9674e]">02</p>
+              <h3 className="text-xl font-semibold">Easy Booking</h3>
+              <p className="mt-3 max-w-sm leading-7 text-[#53645d]">
+                Reserve your tickets in a few simple steps and get on with the
+                excitement.
+              </p>
+            </article>
+            <article>
+              <p className="mb-5 text-sm font-semibold text-[#d9674e]">03</p>
+              <h3 className="text-xl font-semibold">Secure Platform</h3>
+              <p className="mt-3 max-w-sm leading-7 text-[#53645d]">
+                Your booking details are handled with care from start to finish.
+              </p>
+            </article>
+          </div>
+        </section>
       </main>
+
+      <footer className="border-t border-[#17372f]/10 bg-[#edf1ec]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <a href="/" className="font-bold text-[#17372f]">
+            EventBook
+          </a>
+          <p>© 2026 EventBook. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

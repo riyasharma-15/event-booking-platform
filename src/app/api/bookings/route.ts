@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { eventId, ticketCount } = body as Record<string, unknown>
+    const { eventId, ticketCount, email, mobile } = body as Record<string, unknown>
 
     // 4. Validate eventId: must be a positive integer
     if (
@@ -70,7 +70,22 @@ export async function POST(request: Request) {
       )
     }
 
-    // 6. Check the event exists
+    // 6. Validate booking contact details
+    if (typeof email !== 'string' || email.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'email must be a non-empty string' },
+        { status: 400 }
+      )
+    }
+
+    if (typeof mobile !== 'string' || mobile.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'mobile must be a non-empty string' },
+        { status: 400 }
+      )
+    }
+
+    // 7. Check the event exists
     const event = await prisma.event.findUnique({
       where: { id: eventId },
     })
@@ -82,7 +97,15 @@ export async function POST(request: Request) {
       )
     }
 
-    // 7. Run the booking inside a Prisma transaction
+    // 8. Check if the event is cancelled
+    if (event.status === 'CANCELLED') {
+      return NextResponse.json(
+        { error: 'Cannot book a cancelled event' },
+        { status: 409 }
+      )
+    }
+
+    // 9. Run the booking inside a Prisma transaction
     const booking = await prisma.$transaction(async (tx) => {
       // 7a. Atomically decrement availableSeats ONLY if seats are sufficient.
       //     updateMany returns { count: number } — the number of rows matched and updated.
@@ -115,6 +138,8 @@ export async function POST(request: Request) {
           userId: user.id,
           eventId,
           ticketCount,
+          email,
+          mobile,
         },
         select: {
           id: true,
@@ -131,7 +156,7 @@ export async function POST(request: Request) {
       return newBooking
     })
 
-    // 8. Return the created booking
+    // 10. Return the created booking
     return NextResponse.json(
       {
         message: 'Booking created successfully',
@@ -140,6 +165,26 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error: unknown) {
+    const prismaError = error as {
+      code?: unknown
+      meta?: { target?: unknown }
+    }
+    const target = prismaError?.meta?.target
+    const isDuplicateBookingContact =
+      prismaError?.code === 'P2002' &&
+      (Array.isArray(target)
+        ? target.includes('eventId') &&
+          (target.includes('email') || target.includes('mobile'))
+        : target === 'Booking_eventId_email_key' ||
+          target === 'Booking_eventId_mobile_key')
+
+    if (isDuplicateBookingContact) {
+      return NextResponse.json(
+        { error: 'This email or mobile number has already been used for this event.' },
+        { status: 409 }
+      )
+    }
+
     // Handle the insufficient seats sentinel thrown inside the transaction
     if (error instanceof InsufficientSeatsError) {
       return NextResponse.json(
@@ -150,6 +195,70 @@ export async function POST(request: Request) {
 
     // All other unexpected errors
     console.error('Booking API error:', error)
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    // 1. Authenticate the user
+    const user = await getCurrentUser(request)
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // 2. Only ATTENDEE users can access this endpoint
+    if (user.role !== 'ATTENDEE') {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      )
+    }
+
+    // 3. Retrieve all bookings belonging to the authenticated user
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        ticketCount: true,
+        status: true,
+        bookingDate: true,
+        createdAt: true,
+        updatedAt: true,
+        event: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            date: true,
+            time: true,
+            location: true,
+            image: true,
+            status: true,
+          },
+        },
+      },
+    })
+
+    // 4. Return the bookings list with 200 OK
+    return NextResponse.json(
+      { bookings },
+      { status: 200 }
+    )
+  } catch (error: unknown) {
+    console.error('Error fetching bookings:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

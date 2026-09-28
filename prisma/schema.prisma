@@ -70,6 +70,8 @@ model Booking {
   userId      Int
   eventId     Int
   ticketCount Int
+  email       String
+  mobile      String
   status      BookingStatus @default(CONFIRMED)
   bookingDate DateTime      @default(now())
   createdAt   DateTime      @default(now())
@@ -77,4 +79,8 @@ model Booking {
 
   user        User          @relation(fields: [userId], references: [id])
   event       Event         @relation(fields: [eventId], references: [id])
+
+  @@unique([eventId, email])
+  @@unique([eventId, mobile])
 }
+
