@@ -43,7 +43,7 @@ export default function LoginPage() {
       }
 
       setFeedback({ message: payload.message || 'Login successful.', success: true })
-      window.setTimeout(() => router.push('/events'), 900)
+      window.setTimeout(() => router.push('/dashboard'), 900)
     } catch {
       setFeedback({
         message: 'A server error occurred. Please try again.',

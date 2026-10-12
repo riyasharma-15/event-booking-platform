@@ -19,6 +19,8 @@ export async function GET(request: Request) {
           name: user.name,
           email: user.email,
           role: user.role,
+          organizerStatus: user.organizerStatus,
+          rejectionReason: user.rejectionReason,
         },
       },
       { status: 200 }

@@ -15,6 +15,14 @@ datasource db {
 enum Role {
   ATTENDEE
   ORGANIZER
+  ADMIN
+}
+
+enum OrganizerStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum BookingStatus {
@@ -33,6 +41,12 @@ model User {
   email     String    @unique
   password  String
   role      Role      @default(ATTENDEE)
+  organizerStatus OrganizerStatus @default(NONE)
+  organizationName String?
+  phoneNumber String?
+  organizationDescription String?
+  organizationPurpose String?
+  rejectionReason String?
   createdAt DateTime  @default(now())
   sessions  Session[]
   events    Event[]
@@ -71,7 +85,6 @@ model Booking {
   eventId     Int
   ticketCount Int
   email       String
-  mobile      String
   status      BookingStatus @default(CONFIRMED)
   bookingDate DateTime      @default(now())
   createdAt   DateTime      @default(now())
@@ -81,6 +94,5 @@ model Booking {
   event       Event         @relation(fields: [eventId], references: [id])
 
   @@unique([eventId, email])
-  @@unique([eventId, mobile])
 }
 

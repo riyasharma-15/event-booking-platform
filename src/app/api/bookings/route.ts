@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { eventId, ticketCount, email, mobile } = body as Record<string, unknown>
+    const { eventId, ticketCount, email } = body as Record<string, unknown>
 
     // 4. Validate eventId: must be a positive integer
     if (
@@ -74,13 +74,6 @@ export async function POST(request: Request) {
     if (typeof email !== 'string' || email.trim().length === 0) {
       return NextResponse.json(
         { error: 'email must be a non-empty string' },
-        { status: 400 }
-      )
-    }
-
-    if (typeof mobile !== 'string' || mobile.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'mobile must be a non-empty string' },
         { status: 400 }
       )
     }
@@ -139,7 +132,6 @@ export async function POST(request: Request) {
           eventId,
           ticketCount,
           email,
-          mobile,
         },
         select: {
           id: true,
@@ -167,20 +159,27 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     const prismaError = error as {
       code?: unknown
-      meta?: { target?: unknown }
+      meta?: {
+        target?: unknown
+        driverAdapterError?: {
+          cause?: {
+            constraint?: { index?: unknown }
+          }
+        }
+      }
     }
     const target = prismaError?.meta?.target
-    const isDuplicateBookingContact =
+    const isDuplicateBookingEmail =
       prismaError?.code === 'P2002' &&
-      (Array.isArray(target)
-        ? target.includes('eventId') &&
-          (target.includes('email') || target.includes('mobile'))
-        : target === 'Booking_eventId_email_key' ||
-          target === 'Booking_eventId_mobile_key')
+      (prismaError.meta?.driverAdapterError?.cause?.constraint?.index ===
+        'Booking_eventId_email_key' ||
+        (Array.isArray(target)
+          ? target.includes('eventId') && target.includes('email')
+          : target === 'Booking_eventId_email_key'))
 
-    if (isDuplicateBookingContact) {
+    if (isDuplicateBookingEmail) {
       return NextResponse.json(
-        { error: 'This email or mobile number has already been used for this event.' },
+        { error: 'You have already booked this event using this email.' },
         { status: 409 }
       )
     }

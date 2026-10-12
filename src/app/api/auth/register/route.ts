@@ -43,12 +43,14 @@ export async function POST(request: Request) {
     // 3. Hash the password using bcryptjs with 10 salt rounds
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // 4. Create the new user in PostgreSQL via Prisma (role defaults to ATTENDEE)
+    // 4. Create the new user with server-controlled public registration status
     const newUser = await prisma.user.create({
       data: {
         name: trimmedName,
         email: trimmedEmail,
         password: hashedPassword,
+        role: 'ATTENDEE',
+        organizerStatus: 'NONE',
       },
       select: {
         id: true,
