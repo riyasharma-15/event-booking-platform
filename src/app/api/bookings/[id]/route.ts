@@ -78,14 +78,21 @@ export async function DELETE(
     }
 
     // 8. Execute status cancellation and seat return inside a Prisma transaction
-    await prisma.$transaction(async (tx) => {
-      // Update booking status to CANCELLED (preserve booking history)
-      await tx.booking.update({
-        where: { id: bookingId },
+    const cancellationApplied = await prisma.$transaction(async (tx) => {
+      const result = await tx.booking.updateMany({
+        where: {
+          id: bookingId,
+          userId: user.id,
+          status: BookingStatus.CONFIRMED,
+        },
         data: {
           status: BookingStatus.CANCELLED,
         },
       })
+
+      if (result.count !== 1) {
+        return false
+      }
 
       // Increase the related event's availableSeats by the booking's ticketCount
       await tx.event.update({
@@ -96,7 +103,16 @@ export async function DELETE(
           },
         },
       })
+
+      return true
     })
+
+    if (!cancellationApplied) {
+      return NextResponse.json(
+        { error: 'Booking is no longer cancellable' },
+        { status: 409 }
+      )
+    }
 
     // 10. Return success message
     return NextResponse.json(

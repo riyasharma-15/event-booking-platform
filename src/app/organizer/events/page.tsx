@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import EventBookLogo from '@/components/eventbook-logo'
 
 type OrganizerEvent = {
   id: number
@@ -97,18 +98,16 @@ export default function OrganizerEventsPage() {
   }, [retryCount])
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-[#f5f7f4] text-[#17372f]">
-      <header className="border-b border-[#17372f]/10 bg-white">
+    <div className="flex min-h-full flex-1 flex-col bg-white text-primary-text">
+      <header className="border-b border-border bg-white">
         <nav
           aria-label="Main navigation"
           className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12"
         >
-          <Link href="/" className="text-xl font-bold">
-            Event<span className="text-[#d9674e]">Book</span>
-          </Link>
+          <EventBookLogo />
           <Link
             href="/organizer/dashboard"
-            className="text-sm font-semibold transition-colors hover:text-[#d9674e]"
+            className="text-sm font-semibold transition-colors hover:text-primary-indigo"
           >
             Organizer Dashboard
           </Link>
@@ -117,28 +116,28 @@ export default function OrganizerEventsPage() {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
         <section aria-labelledby="my-events-title">
-          <div className="flex flex-col gap-6 border-b border-[#17372f]/15 pb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
+              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-primary-indigo">
                 Organizer
               </p>
               <h1 id="my-events-title" className="text-3xl font-semibold sm:text-4xl">
                 My Events
               </h1>
-              <p className="mt-3 max-w-2xl leading-7 text-[#53645d]">
+              <p className="mt-3 max-w-2xl leading-7 text-secondary-text">
                 View the events you have created and check their details and seat availability.
               </p>
             </div>
             <Link
               href="/organizer/events/new"
-              className="inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#285447]"
+              className="inline-flex min-h-12 items-center justify-center rounded-md bg-primary-indigo px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
             >
               Create Event
             </Link>
           </div>
 
           {eventsState.status === 'loading' ? (
-            <p className="py-16 text-center text-[#53645d]" role="status">
+            <p className="py-16 text-center text-secondary-text" role="status">
               Loading your events...
             </p>
           ) : eventsState.status === 'unauthenticated' ? (
@@ -146,7 +145,7 @@ export default function OrganizerEventsPage() {
               <h2 className="text-xl font-semibold">Please log in to view your events.</h2>
               <Link
                 href="/login"
-                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-[#17372f]/20 px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-white"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-white"
               >
                 Go to Login
               </Link>
@@ -154,16 +153,16 @@ export default function OrganizerEventsPage() {
           ) : eventsState.status === 'unauthorized' ? (
             <div className="py-16 text-center" role="alert">
               <h2 className="text-xl font-semibold">You are not authorized to view these events.</h2>
-              <p className="mt-2 text-[#53645d]">This page is available to organizers only.</p>
+              <p className="mt-2 text-secondary-text">This page is available to organizers only.</p>
             </div>
           ) : eventsState.status === 'error' ? (
             <div className="py-16 text-center" role="alert">
               <h2 className="text-xl font-semibold">We couldn&apos;t load your events</h2>
-              <p className="mt-2 text-[#53645d]">{eventsState.message}</p>
+              <p className="mt-2 text-secondary-text">{eventsState.message}</p>
               <button
                 type="button"
                 onClick={() => setRetryCount((count) => count + 1)}
-                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-[#17372f]/20 px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-white"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-white"
               >
                 Try again
               </button>
@@ -171,10 +170,10 @@ export default function OrganizerEventsPage() {
           ) : eventsState.events.length === 0 ? (
             <div className="py-16 text-center">
               <h2 className="text-xl font-semibold">You haven&apos;t created any events yet.</h2>
-              <p className="mt-2 text-[#53645d]">Your events will appear here after you create one.</p>
+              <p className="mt-2 text-secondary-text">Your events will appear here after you create one.</p>
               <Link
                 href="/organizer/events/new"
-                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-[#17372f]/20 bg-white px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-[#edf1ec]"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-light-indigo"
               >
                 Create your first event
               </Link>
@@ -184,36 +183,36 @@ export default function OrganizerEventsPage() {
               {eventsState.events.map((event) => (
                 <article
                   key={event.id}
-                  className="flex min-w-0 flex-col rounded-lg border border-[#17372f]/10 bg-white p-5 shadow-sm sm:p-6"
+                  className="flex min-w-0 flex-col rounded-lg border border-border bg-white p-5 shadow-sm sm:p-6"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <h2 className="min-w-0 text-xl font-semibold leading-7">{event.title}</h2>
-                    <span className="shrink-0 rounded-full bg-[#edf1ec] px-3 py-1 text-xs font-semibold text-[#53645d]">
+                    <span className="shrink-0 rounded-full bg-light-indigo px-3 py-1 text-xs font-semibold text-primary-text">
                       {event.status}
                     </span>
                   </div>
-                  <p className="mt-3 whitespace-pre-line leading-6 text-[#53645d]">
+                  <p className="mt-3 whitespace-pre-line leading-6 text-secondary-text">
                     {event.description}
                   </p>
-                  <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-[#17372f]/10 pt-4 text-sm">
+                  <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border pt-4 text-sm">
                     <div>
-                      <dt className="text-[#78857f]">Date</dt>
+                      <dt className="text-secondary-text">Date</dt>
                       <dd className="mt-1 font-medium">{formatEventDate(event.date)}</dd>
                     </div>
                     <div>
-                      <dt className="text-[#78857f]">Time</dt>
+                      <dt className="text-secondary-text">Time</dt>
                       <dd className="mt-1 font-medium">{event.time}</dd>
                     </div>
                     <div className="col-span-2">
-                      <dt className="text-[#78857f]">Location</dt>
+                      <dt className="text-secondary-text">Location</dt>
                       <dd className="mt-1 font-medium">{event.location}</dd>
                     </div>
                     <div>
-                      <dt className="text-[#78857f]">Total seats</dt>
+                      <dt className="text-secondary-text">Total seats</dt>
                       <dd className="mt-1 font-semibold">{event.totalSeats}</dd>
                     </div>
                     <div>
-                      <dt className="text-[#78857f]">Available seats</dt>
+                      <dt className="text-secondary-text">Available seats</dt>
                       <dd className="mt-1 font-semibold">{event.availableSeats}</dd>
                     </div>
                   </dl>
@@ -224,9 +223,9 @@ export default function OrganizerEventsPage() {
         </section>
       </main>
 
-      <footer className="border-t border-[#17372f]/10 bg-[#edf1ec]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-          <Link href="/" className="font-bold text-[#17372f]">EventBook</Link>
+      <footer className="border-t border-border bg-light-indigo">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-primary-text sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <EventBookLogo compact />
           <p>© 2026 EventBook. All rights reserved.</p>
         </div>
       </footer>

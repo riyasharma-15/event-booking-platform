@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import EventBookLogo from '@/components/eventbook-logo'
 import { useParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
@@ -178,24 +179,22 @@ export default function EventDetailsPage() {
   }, [id, eventRefreshKey])
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-[#f5f7f4] text-[#17372f]">
-      <header className="border-b border-[#17372f]/10 bg-[#f5f7f4]">
+    <div className="flex min-h-full flex-1 flex-col bg-white text-primary-text">
+      <header className="border-b border-border bg-white">
         <nav
           aria-label="Main navigation"
           className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 sm:px-8 lg:px-12"
         >
-          <Link href="/" className="text-xl font-bold">
-            Event<span className="text-[#d9674e]">Book</span>
-          </Link>
+          <EventBookLogo />
           <div className="flex items-center gap-5 text-sm font-medium sm:gap-8">
-            <Link className="text-[#d9674e]" href="/events" aria-current="page">
+            <Link className="text-primary-indigo" href="/events" aria-current="page">
               Events
             </Link>
-            <Link className="transition-colors hover:text-[#d9674e]" href="/login">
+            <Link className="transition-colors hover:text-primary-indigo" href="/login">
               Login
             </Link>
             <Link
-              className="rounded-md bg-[#17372f] px-4 py-2.5 text-white transition-colors hover:bg-[#285447]"
+              className="rounded-md bg-primary-indigo px-4 py-2.5 text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
               href="/register"
             >
               Register
@@ -207,35 +206,35 @@ export default function EventDetailsPage() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
         <Link
           href="/events"
-          className="inline-flex min-h-10 items-center text-sm font-semibold text-[#53645d] transition-colors hover:text-[#d9674e]"
+          className="inline-flex min-h-10 items-center text-sm font-semibold text-secondary-text transition-colors hover:text-primary-indigo"
         >
           <span aria-hidden="true" className="mr-2">←</span>
           Back to Events
         </Link>
 
         {pageState === 'loading' ? (
-          <p className="py-24 text-center text-[#53645d]" role="status">
+          <p className="py-24 text-center text-secondary-text" role="status">
             Loading event details…
           </p>
         ) : pageState === 'invalid' ? (
           <div className="py-24 text-center" role="alert">
             <h1 className="text-2xl font-semibold">Invalid event ID</h1>
-            <p className="mt-3 text-[#53645d]">The event link does not contain a valid ID.</p>
+            <p className="mt-3 text-secondary-text">The event link does not contain a valid ID.</p>
           </div>
         ) : pageState === 'not-found' ? (
           <div className="py-24 text-center" role="status">
             <h1 className="text-2xl font-semibold">Event not found</h1>
-            <p className="mt-3 text-[#53645d]">This event may have been removed or is no longer available.</p>
+            <p className="mt-3 text-secondary-text">This event may have been removed or is no longer available.</p>
           </div>
         ) : pageState === 'error' || !event ? (
           <div className="py-24 text-center" role="alert">
             <h1 className="text-2xl font-semibold">We couldn’t load this event</h1>
-            <p className="mt-3 text-[#53645d]">Please try again in a little while.</p>
+            <p className="mt-3 text-secondary-text">Please try again in a little while.</p>
           </div>
         ) : (
-          <article className="mt-6 overflow-hidden rounded-lg border border-[#17372f]/10 bg-white shadow-sm">
+          <article className="mt-6 overflow-hidden rounded-lg border border-border bg-white shadow-sm">
             <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="relative aspect-[16/10] bg-[#e8ede8] lg:aspect-auto lg:min-h-[34rem]">
+              <div className="relative aspect-[16/10] bg-light-indigo lg:aspect-auto lg:min-h-[34rem]">
                 {event.image ? (
                   <Image
                     src={event.image}
@@ -247,45 +246,45 @@ export default function EventDetailsPage() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex h-full min-h-64 items-center justify-center text-sm font-medium text-[#78857f]">
+                  <div className="flex h-full min-h-64 items-center justify-center text-sm font-medium text-secondary-text">
                     Event image unavailable
                   </div>
                 )}
               </div>
 
               <div className="flex flex-col p-6 sm:p-9 lg:p-10">
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary-indigo">
                   Event details
                 </p>
                 <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
                   {event.title}
                 </h1>
-                <p className="mt-5 whitespace-pre-line leading-7 text-[#53645d]">
+                <p className="mt-5 whitespace-pre-line leading-7 text-secondary-text">
                   {event.description}
                 </p>
 
-                <dl className="mt-8 grid grid-cols-1 gap-5 border-t border-[#17372f]/10 pt-6 sm:grid-cols-2">
+                <dl className="mt-8 grid grid-cols-1 gap-5 border-t border-border pt-6 sm:grid-cols-2">
                   <div>
-                    <dt className="text-sm text-[#78857f]">Date</dt>
+                    <dt className="text-sm text-secondary-text">Date</dt>
                     <dd className="mt-1 font-semibold">{formatEventDate(event.date)}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-[#78857f]">Time</dt>
+                    <dt className="text-sm text-secondary-text">Time</dt>
                     <dd className="mt-1 font-semibold">{event.time}</dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-sm text-[#78857f]">Location</dt>
+                    <dt className="text-sm text-secondary-text">Location</dt>
                     <dd className="mt-1 font-semibold">{event.location}</dd>
                   </div>
                 </dl>
 
-                <div className="mt-7 grid grid-cols-2 gap-4 rounded-md bg-[#f5f7f4] p-4">
+                <div className="mt-7 grid grid-cols-2 gap-4 rounded-md bg-white p-4">
                   <div>
-                    <p className="text-sm text-[#78857f]">Available seats</p>
+                    <p className="text-sm text-secondary-text">Available seats</p>
                     <p className="mt-1 text-lg font-semibold">{event.availableSeats}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-[#78857f]">Total seats</p>
+                    <p className="text-sm text-secondary-text">Total seats</p>
                     <p className="mt-1 text-lg font-semibold">{event.totalSeats}</p>
                   </div>
                 </div>
@@ -293,7 +292,7 @@ export default function EventDetailsPage() {
                 <button
                   type="button"
                   onClick={() => setIsBookingOpen(true)}
-                  className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
+                  className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-primary-indigo px-6 py-3 font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
                 >
                   Book Tickets
                 </button>
@@ -306,12 +305,12 @@ export default function EventDetailsPage() {
                   submitEvent.preventDefault()
                   void submitBooking()
                 }}
-                className="grid gap-5 border-t border-[#17372f]/10 p-6 sm:grid-cols-2 sm:p-9 lg:p-10"
+                className="grid gap-5 border-t border-border p-6 sm:grid-cols-2 sm:p-9 lg:p-10"
               >
                 {bookingFeedback && (
                   <p
                     className={`sm:col-span-2 text-sm font-medium ${
-                      bookingFeedback.type === 'error' ? 'text-[#b43f32]' : 'text-[#285447]'
+                      bookingFeedback.type === 'error' ? 'text-error' : 'text-primary-text'
                     }`}
                     role={bookingFeedback.type === 'error' ? 'alert' : 'status'}
                   >
@@ -332,7 +331,7 @@ export default function EventDetailsPage() {
                       setTicketCount(Number(changeEvent.target.value))
                       setBookingFeedback(null)
                     }}
-                    className="min-h-12 w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 text-base outline-none focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                    className="min-h-12 w-full rounded-md border border-border bg-white px-3.5 text-base outline-none focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
                   />
                 </div>
                 <div>
@@ -349,14 +348,14 @@ export default function EventDetailsPage() {
                       setEmail(changeEvent.target.value)
                       setBookingFeedback(null)
                     }}
-                    className="min-h-12 w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 text-base outline-none focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                    className="min-h-12 w-full rounded-md border border-border bg-white px-3.5 text-base outline-none focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
                   />
                 </div>
                 <div className="flex items-end">
                   <button
                     type="submit"
                     disabled={isSubmittingBooking}
-                    className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
+                    className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-primary-indigo px-6 py-3 font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
                   >
                     {isSubmittingBooking ? 'Booking…' : 'Confirm Booking'}
                   </button>
@@ -367,11 +366,9 @@ export default function EventDetailsPage() {
         )}
       </main>
 
-      <footer className="border-t border-[#17372f]/10 bg-[#edf1ec]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-          <Link href="/" className="font-bold text-[#17372f]">
-            EventBook
-          </Link>
+      <footer className="border-t border-border bg-light-indigo">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-primary-text sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <EventBookLogo compact />
           <p>© 2026 EventBook. All rights reserved.</p>
         </div>
       </footer>

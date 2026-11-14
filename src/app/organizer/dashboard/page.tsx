@@ -1,172 +1,267 @@
-'use client'
-
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { BookingStatus } from '@/generated/prisma/client'
+import { prisma } from '@/lib/prisma'
+import { requireServerRole } from '@/lib/server-auth'
 
-type DashboardUser = {
-  name: string
-  email: string
-  role: string
+type SummaryCardProps = {
+  label: string
+  value: string
+  detail: string
+  icon: 'events' | 'registrations' | 'upcoming' | 'revenue'
 }
 
-type DashboardState =
-  | { status: 'loading' }
-  | { status: 'unauthenticated' }
-  | { status: 'unauthorized' }
-  | { status: 'authenticated'; user: DashboardUser }
-  | { status: 'error'; message: string }
+const summaryIcons: Record<SummaryCardProps['icon'], string> = {
+  events: 'M4 5h16v16H4z M8 3v4 M16 3v4 M4 10h16',
+  registrations: 'M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M20 21v-2a4 4 0 0 0-3-3.87',
+  upcoming: 'M12 8v4l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+  revenue: 'M3 6h18v12H3z M3 10h18 M7 15h3',
+}
 
-export default function OrganizerDashboardPage() {
-  const [dashboardState, setDashboardState] = useState<DashboardState>({ status: 'loading' })
-  const [retryCount, setRetryCount] = useState(0)
+function SummaryCard({ label, value, detail, icon }: SummaryCardProps) {
+  return (
+    <article className="rounded-xl border border-border bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-secondary-text">{label}</p>
+          <p className="mt-3 text-3xl font-semibold tracking-tight text-primary-text">{value}</p>
+        </div>
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-light-indigo text-primary-indigo">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="size-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d={summaryIcons[icon]} />
+          </svg>
+        </span>
+      </div>
+      <p className="mt-4 text-xs leading-5 text-secondary-text">{detail}</p>
+    </article>
+  )
+}
 
-  useEffect(() => {
-    let isCurrent = true
+function eventStartTime(date: Date, time: string) {
+  const parsedTime = /^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/.exec(time)
+  if (!parsedTime) return null
 
-    async function loadCurrentUser() {
-      setDashboardState({ status: 'loading' })
+  return new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    Number(parsedTime[1]),
+    Number(parsedTime[2]),
+    Number(parsedTime[3] ?? 0),
+  ))
+}
 
-      try {
-        const response = await fetch('/api/auth/me', { credentials: 'include' })
+function formatEventDate(date: Date) {
+  return new Intl.DateTimeFormat('en', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}
 
-        if (response.status === 401) {
-          if (isCurrent) setDashboardState({ status: 'unauthenticated' })
-          return
-        }
+export default async function OrganizerDashboardPage() {
+  const organizer = await requireServerRole('ORGANIZER')
+  const now = new Date()
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+  const tomorrowStart = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
 
-        const payload: { user?: DashboardUser; error?: string } = await response.json()
+  const [totalEvents, registrations, futureEventsCount, todayEvents, laterEvents] = await Promise.all([
+    prisma.event.count({
+      where: { organizerId: organizer.id },
+    }),
+    prisma.booking.aggregate({
+      where: {
+        status: BookingStatus.CONFIRMED,
+        event: { organizerId: organizer.id },
+      },
+      _sum: { ticketCount: true },
+    }),
+    prisma.event.count({
+      where: {
+        organizerId: organizer.id,
+        date: { gte: tomorrowStart },
+      },
+    }),
+    prisma.event.findMany({
+      where: {
+        organizerId: organizer.id,
+        date: { gte: todayStart, lt: tomorrowStart },
+      },
+      select: {
+        id: true,
+        title: true,
+        date: true,
+        time: true,
+        location: true,
+        status: true,
+      },
+    }),
+    prisma.event.findMany({
+      where: {
+        organizerId: organizer.id,
+        date: { gte: tomorrowStart },
+      },
+      orderBy: [{ date: 'asc' }, { time: 'asc' }],
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        date: true,
+        time: true,
+        location: true,
+        status: true,
+      },
+    }),
+  ])
 
-        if (!response.ok) {
-          throw new Error(payload.error || 'Unable to check your session. Please try again.')
-        }
-
-        if (!payload.user) {
-          throw new Error('The user information could not be loaded. Please try again.')
-        }
-
-        if (isCurrent) {
-          setDashboardState(
-            payload.user.role === 'ORGANIZER'
-              ? { status: 'authenticated', user: payload.user }
-              : { status: 'unauthorized' },
-          )
-        }
-      } catch (error) {
-        if (isCurrent) {
-          setDashboardState({
-            status: 'error',
-            message: error instanceof Error
-              ? error.message
-              : 'A server error occurred. Please try again.',
-          })
-        }
-      }
-    }
-
-    void loadCurrentUser()
-
-    return () => {
-      isCurrent = false
-    }
-  }, [retryCount])
+  const todayUpcomingEvents = todayEvents
+    .map((event) => ({ ...event, startsAt: eventStartTime(event.date, event.time) }))
+    .filter((event) => event.startsAt !== null && event.startsAt > now)
+    .sort((first, second) => first.startsAt!.getTime() - second.startsAt!.getTime())
+  const upcomingEvents = [
+    ...todayUpcomingEvents,
+    ...laterEvents.map((event) => ({ ...event, startsAt: eventStartTime(event.date, event.time) })),
+  ]
+    .filter((event) => event.startsAt !== null)
+    .sort((first, second) => first.startsAt!.getTime() - second.startsAt!.getTime())
+    .slice(0, 5)
+  const upcomingEventsCount = futureEventsCount + todayUpcomingEvents.length
+  const registrationGroups = upcomingEvents.length > 0
+    ? await prisma.booking.groupBy({
+        by: ['eventId'],
+        where: {
+          eventId: { in: upcomingEvents.map((event) => event.id) },
+          status: BookingStatus.CONFIRMED,
+          event: { organizerId: organizer.id },
+        },
+        _sum: { ticketCount: true },
+      })
+    : []
+  const registrationsByEventId = new Map(
+    registrationGroups.map((group) => [group.eventId, group._sum.ticketCount ?? 0]),
+  )
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-white text-[#17372f]">
-      <header className="border-b border-[#17372f]/10 bg-white">
-        <nav
-          aria-label="Main navigation"
-          className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 sm:px-8 lg:px-12"
-        >
-          <Link href="/" aria-label="EventBook home" className="inline-flex items-baseline font-bold leading-none">
-            <span className="text-2xl tracking-tight">Event</span>
-            <span className="text-lg text-[#d9674e]">Book</span>
-          </Link>
-          <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-3 text-sm font-medium sm:gap-x-8">
-            <Link className="transition-colors hover:text-[#d9674e]" href="/events">
-              Explore Events
-            </Link>
-            <Link className="transition-colors hover:text-[#d9674e]" href="/organizer/events">
-              My Events
-            </Link>
-            <Link className="transition-colors hover:text-[#d9674e]" href="/organizer/events/new">
-              Create Event
-            </Link>
-            {dashboardState.status === 'authenticated' && (
-              <div className="flex items-center gap-2.5 border-l border-[#17372f]/10 pl-4 sm:pl-6">
-                <span
-                  aria-hidden="true"
-                  className="flex size-9 items-center justify-center rounded-full bg-[#e8ede8] text-sm font-semibold text-[#17372f]"
-                >
-                  {dashboardState.user.name.trim().charAt(0).toUpperCase()}
-                </span>
-                <span className="max-w-32 truncate font-semibold">{dashboardState.user.name}</span>
-              </div>
-            )}
-          </div>
-        </nav>
-      </header>
-
-      <main className="mx-auto flex w-full max-w-6xl flex-1 items-center px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
-        {dashboardState.status === 'loading' ? (
-          <p className="w-full py-16 text-center text-[#53645d]" role="status">
-            Checking your session...
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-7 sm:py-10 lg:px-10">
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary-indigo">
+            Organizer workspace
           </p>
-        ) : dashboardState.status === 'unauthenticated' ? (
-          <section className="mx-auto max-w-xl text-center" role="alert">
-            <h1 className="text-3xl font-semibold">You need to log in to access the organizer dashboard.</h1>
-            <Link
-              href="/login"
-              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
-            >
-              Go to Login
-            </Link>
-          </section>
-        ) : dashboardState.status === 'unauthorized' ? (
-          <section className="mx-auto max-w-xl text-center" role="alert">
-            <h1 className="text-3xl font-semibold">You are not authorized to view this page.</h1>
-            <p className="mt-3 text-[#53645d]">This dashboard is available to organizers only.</p>
-            <Link
-              href="/dashboard"
-              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md border border-[#17372f]/20 px-6 py-3 font-semibold transition-colors hover:bg-[#f5f7f4]"
-            >
-              Go to attendee dashboard
-            </Link>
-          </section>
-        ) : dashboardState.status === 'error' ? (
-          <section className="mx-auto max-w-xl text-center" role="alert">
-            <h1 className="text-2xl font-semibold">We couldn&apos;t load your dashboard</h1>
-            <p className="mt-3 text-[#53645d]">{dashboardState.message}</p>
-            <button
-              type="button"
-              onClick={() => setRetryCount((count) => count + 1)}
-              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
-            >
-              Try again
-            </button>
-          </section>
-        ) : (
-          <section className="mx-auto w-full">
-            <div className="border-b border-[#17372f]/10 pb-10 sm:pb-12">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
-                Organizer Dashboard
-              </p>
-              <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
-                Welcome back, {dashboardState.user.name} 👋
-              </h1>
-              <p className="mt-5 text-base leading-7 text-[#53645d] sm:text-lg">
-                Manage your events and keep track of bookings from one place.
-              </p>
-            </div>
-          </section>
-        )}
-      </main>
-
-      <footer className="border-t border-[#17372f]/10 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-          <Link href="/" className="font-bold text-[#17372f]">EventBook</Link>
-          <p>© 2026 EventBook. All rights reserved.</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Dashboard</h1>
+          <p className="mt-2 text-sm leading-6 text-secondary-text sm:text-base">
+            Welcome back, {organizer.name}. Here&apos;s an overview of your events.
+          </p>
         </div>
-      </footer>
+        <Link
+          href="/organizer/events/new"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-indigo px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-indigo"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">+</span>
+          Create New Event
+        </Link>
+      </div>
+
+      <section aria-label="Dashboard summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard
+          label="Total Events Created"
+          value={String(totalEvents)}
+          detail="Events created in your organizer account"
+          icon="events"
+        />
+        <SummaryCard
+          label="Total Registrations"
+          value={String(registrations._sum.ticketCount ?? 0)}
+          detail="Attendees registered across your events"
+          icon="registrations"
+        />
+        <SummaryCard
+          label="Upcoming Events"
+          value={String(upcomingEventsCount)}
+          detail="Events with a date and time still ahead"
+          icon="upcoming"
+        />
+        <SummaryCard
+          label="Total Revenue"
+          value="Not available yet"
+          detail="Payment tracking is not available"
+          icon="revenue"
+        />
+      </section>
+
+      <section aria-labelledby="upcoming-events-title" className="mt-8 rounded-xl border border-border bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div>
+            <h2 id="upcoming-events-title" className="text-lg font-semibold">Upcoming Events</h2>
+            <p className="mt-1 text-sm text-secondary-text">Your next scheduled events, ordered by date.</p>
+          </div>
+          <Link href="/organizer/events" className="text-sm font-semibold text-primary-indigo hover:text-primary-indigo">
+            View all events
+          </Link>
+        </div>
+
+        {upcomingEvents.length === 0 ? (
+          <div className="px-5 py-12 text-center sm:px-6">
+            <h3 className="text-base font-semibold">No upcoming events yet</h3>
+            <p className="mt-2 text-sm text-secondary-text">Create an event to start welcoming attendees.</p>
+            <Link
+              href="/organizer/events/new"
+              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-indigo px-4 py-2 text-sm font-semibold text-white hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
+            >
+              Create New Event
+            </Link>
+          </div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {upcomingEvents.map((event) => (
+              <li key={event.id} className="grid gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto] sm:items-center sm:px-6">
+                <div className="min-w-0">
+                  <h3 className="truncate font-semibold">{event.title}</h3>
+                  <p className="mt-1 text-sm text-secondary-text">
+                    {formatEventDate(event.date)} at {event.time}
+                  </p>
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-secondary-text">{event.location}</p>
+                  <p className="mt-1 text-xs text-secondary-text">
+                    {registrationsByEventId.get(event.id) ?? 0} {(registrationsByEventId.get(event.id) ?? 0) === 1 ? 'registration' : 'registrations'}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-4 sm:justify-end">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    event.status === 'ACTIVE'
+                      ? 'bg-success-soft text-primary-text'
+                      : 'bg-neutral-soft text-primary-text'
+                  }`}>
+                    {event.status === 'ACTIVE' ? 'Active' : 'Cancelled'}
+                  </span>
+                  <Link href="/organizer/events" className="text-sm font-semibold text-primary-indigo hover:text-primary-indigo">
+                    Manage
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section aria-labelledby="action-required-title" className="mt-6 rounded-xl border border-border bg-white p-5 shadow-sm sm:p-6">
+        <h2 id="action-required-title" className="text-lg font-semibold">Action Required</h2>
+        {upcomingEvents.length === 0 ? (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-secondary-text">You don&apos;t have any upcoming events scheduled.</p>
+            <Link
+              href="/organizer/events/new"
+              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-indigo px-4 py-2 text-sm font-semibold text-white hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
+            >
+              Create an event
+            </Link>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-secondary-text">You&apos;re all caught up!</p>
+        )}
+      </section>
     </div>
   )
 }

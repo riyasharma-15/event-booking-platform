@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import EventBookLogo from '@/components/eventbook-logo'
 import { useEffect, useState } from 'react'
 
 type Booking = {
@@ -121,21 +122,18 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-[#f5f7f4] text-[#17372f]">
-      <header className="border-b border-[#17372f]/10 bg-white">
+    <div className="flex min-h-full flex-1 flex-col bg-white text-primary-text">
+      <header className="border-b border-border bg-white">
         <nav
           aria-label="Main navigation"
           className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 sm:px-8 lg:px-12"
         >
-          <Link href="/" aria-label="EventBook home" className="inline-flex items-baseline font-bold leading-none">
-            <span className="text-2xl">Event</span>
-            <span className="text-lg text-[#d9674e]">Book</span>
-          </Link>
+          <EventBookLogo />
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium sm:gap-x-8">
-            <Link className="transition-colors hover:text-[#d9674e]" href="/events">
+            <Link className="transition-colors hover:text-primary-indigo" href="/events">
               Explore Events
             </Link>
-            <Link className="text-[#d9674e]" href="/bookings" aria-current="page">
+            <Link className="text-primary-indigo" href="/bookings" aria-current="page">
               My Bookings
             </Link>
           </div>
@@ -144,11 +142,11 @@ export default function BookingsPage() {
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
         <section aria-labelledby="bookings-title" className="mx-auto w-full">
-          <div className="border-b border-[#17372f]/10 pb-8 sm:pb-10">
+          <div className="border-b border-border pb-8 sm:pb-10">
             <h1 id="bookings-title" className="text-3xl font-semibold leading-tight sm:text-4xl">
               My Bookings
             </h1>
-            <p className="mt-3 text-base leading-7 text-[#53645d]">
+            <p className="mt-3 text-base leading-7 text-secondary-text">
               View and manage your event bookings.
             </p>
           </div>
@@ -156,7 +154,7 @@ export default function BookingsPage() {
           {cancellationFeedback && (
             <p
               className={`mt-5 text-sm font-medium ${
-                cancellationFeedback.type === 'error' ? 'text-[#b43f32]' : 'text-[#285447]'
+                cancellationFeedback.type === 'error' ? 'text-error' : 'text-primary-text'
               }`}
               role={cancellationFeedback.type === 'error' ? 'alert' : 'status'}
             >
@@ -165,7 +163,7 @@ export default function BookingsPage() {
           )}
 
           {bookingsState.status === 'loading' ? (
-            <p className="py-16 text-center text-[#53645d]" role="status">
+            <p className="py-16 text-center text-secondary-text" role="status">
               Loading your bookings...
             </p>
           ) : bookingsState.status === 'unauthorized' ? (
@@ -173,13 +171,13 @@ export default function BookingsPage() {
               <p className="text-lg font-semibold">Please log in to view your bookings.</p>
               <Link
                 href="/login"
-                className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-[#17372f] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#285447]"
+                className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-primary-indigo px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
               >
                 Log in
               </Link>
             </div>
           ) : bookingsState.status === 'error' ? (
-            <p className="py-16 text-center text-[#53645d]" role="alert">
+            <p className="py-16 text-center text-secondary-text" role="alert">
               We couldn&apos;t load your bookings. Please try again later.
             </p>
           ) : bookingsState.bookings.length === 0 ? (
@@ -187,7 +185,7 @@ export default function BookingsPage() {
               <p className="text-lg font-semibold">You haven&apos;t booked any events yet.</p>
               <Link
                 href="/events"
-                className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-[#17372f] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#285447]"
+                className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-primary-indigo px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
               >
                 Explore events
               </Link>
@@ -197,33 +195,33 @@ export default function BookingsPage() {
               {bookingsState.bookings.map((booking) => (
                 <article
                   key={booking.id}
-                  className="min-w-0 rounded-md border border-[#17372f]/10 bg-white p-5 shadow-sm sm:p-6"
+                  className="min-w-0 rounded-md border border-border bg-white p-5 shadow-sm sm:p-6"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <h2 className="min-w-0 text-xl font-semibold leading-7">{booking.event.title}</h2>
-                    <span className="shrink-0 rounded-full bg-[#e8ede8] px-3 py-1 text-xs font-semibold text-[#53645d]">
+                    <span className="shrink-0 rounded-full bg-light-indigo px-3 py-1 text-xs font-semibold text-primary-text">
                       {booking.status}
                     </span>
                   </div>
-                  <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-[#17372f]/10 pt-4 text-sm">
+                  <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border pt-4 text-sm">
                     <div>
-                      <dt className="text-[#78857f]">Event date</dt>
+                      <dt className="text-secondary-text">Event date</dt>
                       <dd className="mt-1 font-medium">{formatDate(booking.event.date)}</dd>
                     </div>
                     <div>
-                      <dt className="text-[#78857f]">Event time</dt>
+                      <dt className="text-secondary-text">Event time</dt>
                       <dd className="mt-1 font-medium">{booking.event.time}</dd>
                     </div>
                     <div className="col-span-2">
-                      <dt className="text-[#78857f]">Location</dt>
+                      <dt className="text-secondary-text">Location</dt>
                       <dd className="mt-1 break-words font-medium">{booking.event.location}</dd>
                     </div>
                     <div>
-                      <dt className="text-[#78857f]">Tickets</dt>
+                      <dt className="text-secondary-text">Tickets</dt>
                       <dd className="mt-1 font-medium">{booking.ticketCount}</dd>
                     </div>
                     <div>
-                      <dt className="text-[#78857f]">Booking date</dt>
+                      <dt className="text-secondary-text">Booking date</dt>
                       <dd className="mt-1 font-medium">{formatDate(booking.bookingDate)}</dd>
                     </div>
                   </dl>
@@ -236,13 +234,13 @@ export default function BookingsPage() {
                           setCancellationBookingId(booking.id)
                           setCancellationFeedback(null)
                         }}
-                        className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md border border-[#b43f32]/40 px-4 py-2 text-sm font-semibold text-[#b43f32] transition-colors hover:bg-[#fff3f1]"
+                        className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md border border-error px-4 py-2 text-sm font-semibold text-error transition-colors hover:bg-error-soft"
                       >
                         Cancel Booking
                       </button>
                       {cancellationBookingId === booking.id && (
-                        <div className="mt-5 border-t border-[#17372f]/10 pt-4">
-                          <p className="text-sm font-medium text-[#53645d]" role="status">
+                        <div className="mt-5 border-t border-border pt-4">
+                          <p className="text-sm font-medium text-secondary-text" role="status">
                             Are you sure you want to cancel this booking?
                           </p>
                           <div className="mt-3 flex flex-wrap gap-3">
@@ -250,7 +248,7 @@ export default function BookingsPage() {
                               type="button"
                               disabled={cancellingBookingId === booking.id}
                               onClick={() => void cancelBooking(booking.id)}
-                              className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#b43f32] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#96362c]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-md bg-error px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-error"
                             >
                               {cancellingBookingId === booking.id
                                 ? 'Cancelling...'
@@ -260,7 +258,7 @@ export default function BookingsPage() {
                               type="button"
                               disabled={cancellingBookingId !== null}
                               onClick={() => setCancellationBookingId(null)}
-                              className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#17372f]/20 px-4 py-2 text-sm font-semibold text-[#17372f] transition-colors hover:bg-[#f5f7f4]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-md border border-border px-4 py-2 text-sm font-semibold text-primary-text transition-colors hover:bg-white"
                             >
                               Keep Booking
                             </button>
@@ -276,9 +274,9 @@ export default function BookingsPage() {
         </section>
       </main>
 
-      <footer className="border-t border-[#17372f]/10 bg-[#edf1ec]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-          <Link href="/" className="font-bold text-[#17372f]">EventBook</Link>
+      <footer className="border-t border-border bg-light-indigo">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-primary-text sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <EventBookLogo compact />
           <p>© 2026 EventBook. All rights reserved.</p>
         </div>
       </footer>

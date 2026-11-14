@@ -11,12 +11,12 @@ export async function getCurrentUser(request: Request) {
   // 1. Read the "sessionId" cookie from the request
   let sessionId: string | null = null
 
-  // Check if NextRequest cookies API is available
-  if ('cookies' in request && typeof (request as any).cookies?.get === 'function') {
-    const cookie = (request as any).cookies.get('sessionId')
-    if (cookie?.value) {
-      sessionId = cookie.value
-    }
+  const requestWithCookies = request as Request & {
+    cookies?: { get?: (name: string) => { value?: string } | undefined }
+  }
+  const cookie = requestWithCookies.cookies?.get?.('sessionId')
+  if (cookie?.value) {
+    sessionId = cookie.value
   }
 
   // Fallback to parsing the standard HTTP Cookie header
@@ -34,6 +34,10 @@ export async function getCurrentUser(request: Request) {
     }
   }
 
+  return getCurrentUserFromSessionId(sessionId)
+}
+
+export async function getCurrentUserFromSessionId(sessionId: string | null | undefined) {
   // 2. If cookie does not exist, return null
   if (!sessionId) {
     return null

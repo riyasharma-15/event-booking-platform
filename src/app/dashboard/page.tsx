@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import EventBookLogo from '@/components/eventbook-logo'
+import ProfileDropdown from '@/components/profile-dropdown'
 
 type OrganizerStatus = 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'
 
@@ -187,33 +189,30 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-[#f5f7f4] text-[#17372f]">
-      <header className="border-b border-[#17372f]/10 bg-white">
+    <div className="flex min-h-full flex-1 flex-col bg-white text-primary-text">
+      <header className="border-b border-border bg-white">
         <nav
           aria-label="Main navigation"
           className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 sm:px-8 lg:px-12"
         >
-          <Link href="/" aria-label="EventBook home" className="inline-flex items-baseline font-bold leading-none">
-            <span className="text-2xl tracking-tight">Event</span>
-            <span className="text-lg text-[#d9674e]">Book</span>
-          </Link>
+          <EventBookLogo />
           <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-3 text-sm font-medium sm:gap-x-8">
-            <Link className="transition-colors hover:text-[#d9674e]" href="/events">
+            <Link className="transition-colors hover:text-primary-indigo" href="/events">
               Explore Events
             </Link>
-            <Link className="transition-colors hover:text-[#d9674e]" href="/bookings">
+            <Link className="transition-colors hover:text-primary-indigo" href="/bookings">
               My Bookings
             </Link>
+            {dashboardState.status === 'authenticated'
+              && dashboardState.user.role === 'ATTENDEE'
+              && (dashboardState.user.organizerStatus === 'NONE'
+                || dashboardState.user.organizerStatus === 'REJECTED') && (
+                  <Link className="transition-colors hover:text-primary-indigo" href="#organizer-application">
+                    Apply to Become an Organizer
+                  </Link>
+                )}
             {dashboardState.status === 'authenticated' && (
-              <div className="flex items-center gap-2.5 border-l border-[#17372f]/10 pl-4 sm:pl-6">
-                <span
-                  aria-hidden="true"
-                  className="flex size-9 items-center justify-center rounded-full bg-[#e8ede8] text-sm font-semibold text-[#17372f]"
-                >
-                  {dashboardState.user.name.trim().charAt(0).toUpperCase()}
-                </span>
-                <span className="max-w-32 truncate font-semibold">{dashboardState.user.name}</span>
-              </div>
+              <ProfileDropdown name={dashboardState.user.name} />
             )}
           </div>
         </nav>
@@ -221,7 +220,7 @@ export default function DashboardPage() {
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
         {dashboardState.status === 'loading' ? (
-          <p className="w-full py-16 text-center text-[#53645d]" role="status">
+          <p className="w-full py-16 text-center text-secondary-text" role="status">
             Checking your session...
           </p>
         ) : dashboardState.status === 'unauthorized' ? (
@@ -229,7 +228,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-semibold">You need to log in to access your dashboard.</h1>
             <Link
               href="/login"
-              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
+              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-primary-indigo px-6 py-3 font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
             >
               Go to Login
             </Link>
@@ -237,19 +236,19 @@ export default function DashboardPage() {
         ) : dashboardState.status === 'error' ? (
           <section className="mx-auto max-w-xl text-center" role="alert">
             <h1 className="text-2xl font-semibold">We couldn&apos;t load your dashboard</h1>
-            <p className="mt-3 text-[#53645d]">{dashboardState.message}</p>
+            <p className="mt-3 text-secondary-text">{dashboardState.message}</p>
             <button
               type="button"
               onClick={() => setRetryCount((count) => count + 1)}
-              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447]"
+              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-md bg-primary-indigo px-6 py-3 font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo"
             >
               Try again
             </button>
           </section>
         ) : (
           <section className="mx-auto w-full">
-            <div className="border-b border-[#17372f]/10 pb-10 sm:pb-12">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
+            <div className="border-b border-border pb-10 sm:pb-12">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary-indigo">
                 Attendee Dashboard
               </p>
               <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
@@ -258,24 +257,24 @@ export default function DashboardPage() {
               <p className="mt-5 text-lg font-medium leading-7">
                 Ready for your next experience?
               </p>
-              <p className="mt-2 text-base leading-7 text-[#53645d] sm:text-lg">
+              <p className="mt-2 text-base leading-7 text-secondary-text sm:text-lg">
                 Discover events and manage your bookings from one place.
               </p>
             </div>
 
             {dashboardState.user.role === 'ATTENDEE' && (
-              <section className="grid gap-8 border-b border-[#17372f]/10 py-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12 sm:py-12">
+              <section id="organizer-application" className="grid gap-8 border-b border-border py-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12 sm:py-12">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary-indigo">
                     Organizer application
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Become an Organizer</h2>
-                  <p className="mt-3 max-w-xl leading-7 text-[#53645d]">
+                  <p className="mt-3 max-w-xl leading-7 text-secondary-text">
                     Tell us about your organization and the events you hope to bring to EventBook.
                   </p>
 
                   {dashboardState.user.organizerStatus === 'PENDING' && (
-                    <div className="mt-6 border-l-4 border-[#d99a36] bg-[#fff8e8] p-4 text-[#594522]" role="status">
+                    <div className="mt-6 border-l-4 border-warning bg-warning-soft p-4 text-primary-text" role="status">
                       <h3 className="font-semibold">Application pending</h3>
                       <p className="mt-1 text-sm leading-6">
                         {applicationFeedback?.success
@@ -286,7 +285,7 @@ export default function DashboardPage() {
                   )}
 
                   {dashboardState.user.organizerStatus === 'REJECTED' && (
-                    <div className="mt-6 border-l-4 border-[#b43f32] bg-[#fff0ed] p-4 text-[#6d3029]" role="status">
+                    <div className="mt-6 border-l-4 border-error bg-error-soft p-4 text-primary-text" role="status">
                       <h3 className="font-semibold">Your application was rejected</h3>
                       <p className="mt-1 text-sm leading-6">
                         {dashboardState.user.rejectionReason?.trim() || 'No rejection reason was provided.'}
@@ -298,7 +297,7 @@ export default function DashboardPage() {
                   )}
 
                   {dashboardState.user.organizerStatus === 'APPROVED' && (
-                    <div className="mt-6 border-l-4 border-[#285447] bg-[#edf5ef] p-4 text-[#234a3d]" role="status">
+                    <div className="mt-6 border-l-4 border-success bg-success-soft p-4 text-primary-text" role="status">
                       <h3 className="font-semibold">Your application was approved</h3>
                       <p className="mt-1 text-sm leading-6">
                         Organizer access has been approved for your account.
@@ -310,7 +309,7 @@ export default function DashboardPage() {
                 {(dashboardState.user.organizerStatus === 'NONE' || dashboardState.user.organizerStatus === 'REJECTED') && (
                   <form
                     onSubmit={handleApplicationSubmit}
-                    className="rounded-lg border border-[#17372f]/10 bg-white p-5 shadow-sm sm:p-8"
+                    className="rounded-lg border border-border bg-white p-5 shadow-sm sm:p-8"
                   >
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div className="sm:col-span-2">
@@ -326,7 +325,7 @@ export default function DashboardPage() {
                           maxLength={applicationFieldLimits.organizationName}
                           value={applicationForm.organizationName}
                           onChange={(event) => updateApplicationField('organizationName', event.target.value)}
-                          className="min-h-12 w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 text-base outline-none transition focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                          className="min-h-12 w-full rounded-md border border-border bg-white px-3.5 text-base outline-none transition focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
                         />
                       </div>
 
@@ -343,7 +342,7 @@ export default function DashboardPage() {
                           maxLength={applicationFieldLimits.phoneNumber}
                           value={applicationForm.phoneNumber}
                           onChange={(event) => updateApplicationField('phoneNumber', event.target.value)}
-                          className="min-h-12 w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 text-base outline-none transition focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                          className="min-h-12 w-full rounded-md border border-border bg-white px-3.5 text-base outline-none transition focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
                         />
                       </div>
 
@@ -359,7 +358,7 @@ export default function DashboardPage() {
                           maxLength={applicationFieldLimits.organizationDescription}
                           value={applicationForm.organizationDescription}
                           onChange={(event) => updateApplicationField('organizationDescription', event.target.value)}
-                          className="w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 py-3 text-base outline-none transition focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                          className="w-full rounded-md border border-border bg-white px-3.5 py-3 text-base outline-none transition focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
                         />
                       </div>
 
@@ -375,25 +374,25 @@ export default function DashboardPage() {
                           maxLength={applicationFieldLimits.organizationPurpose}
                           value={applicationForm.organizationPurpose}
                           onChange={(event) => updateApplicationField('organizationPurpose', event.target.value)}
-                          className="w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 py-3 text-base outline-none transition focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                          className="w-full rounded-md border border-border bg-white px-3.5 py-3 text-base outline-none transition focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
                         />
                       </div>
                     </div>
 
                     {applicationFeedback && (
                       <p
-                        className={`mt-5 text-sm font-medium ${applicationFeedback.success ? 'text-[#285447]' : 'text-[#b43f32]'}`}
+                        className={`mt-5 text-sm font-medium ${applicationFeedback.success ? 'text-primary-text' : 'text-error'}`}
                         role={applicationFeedback.success ? 'status' : 'alert'}
                       >
                         {applicationFeedback.message}
                       </p>
                     )}
 
-                    <div className="mt-7 border-t border-[#17372f]/10 pt-6">
+                    <div className="mt-7 border-t border-border pt-6">
                       <button
                         type="submit"
                         disabled={isSubmittingApplication}
-                        className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447] disabled:cursor-not-allowed disabled:opacity-65 sm:w-auto"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-primary-indigo px-6 py-3 font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo disabled:cursor-not-allowed disabled:opacity-65 sm:w-auto"
                       >
                         {isSubmittingApplication ? 'Submitting application...' : 'Submit application'}
                       </button>
@@ -406,9 +405,9 @@ export default function DashboardPage() {
         )}
       </main>
 
-      <footer className="border-t border-[#17372f]/10 bg-[#edf1ec]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-          <Link href="/" className="font-bold text-[#17372f]">EventBook</Link>
+      <footer className="border-t border-border bg-light-indigo">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-primary-text sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <EventBookLogo compact />
           <p>© 2026 EventBook. All rights reserved.</p>
         </div>
       </footer>

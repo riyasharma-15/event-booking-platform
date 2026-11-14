@@ -44,6 +44,8 @@ model User {
   organizerStatus OrganizerStatus @default(NONE)
   organizationName String?
   phoneNumber String?
+  location String?
+  profileImage String?
   organizationDescription String?
   organizationPurpose String?
   rejectionReason String?
@@ -95,4 +97,3 @@ model Booking {
 
   @@unique([eventId, email])
 }
-

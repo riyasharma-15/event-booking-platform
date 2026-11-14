@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import EventBookLogo from '@/components/eventbook-logo'
 
 type EventForm = {
   title: string
@@ -88,21 +89,19 @@ export default function CreateEventPage() {
     }
   }
 
-  const inputClassName = 'min-h-12 w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 text-base outline-none transition focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15'
+  const inputClassName = 'min-h-12 w-full rounded-md border border-border bg-white px-3.5 text-base outline-none transition focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20'
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-[#f5f7f4] text-[#17372f]">
-      <header className="border-b border-[#17372f]/10 bg-white">
+    <div className="flex min-h-full flex-1 flex-col bg-white text-primary-text">
+      <header className="border-b border-border bg-white">
         <nav
           aria-label="Main navigation"
           className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12"
         >
-          <Link href="/" className="text-xl font-bold">
-            Event<span className="text-[#d9674e]">Book</span>
-          </Link>
+          <EventBookLogo />
           <Link
             href="/organizer/dashboard"
-            className="text-sm font-semibold transition-colors hover:text-[#d9674e]"
+            className="text-sm font-semibold transition-colors hover:text-primary-indigo"
           >
             Back to dashboard
           </Link>
@@ -111,18 +110,18 @@ export default function CreateEventPage() {
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-10 sm:px-8 sm:py-14">
         <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#d9674e]">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary-indigo">
             Organizer
           </p>
           <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Create an event</h1>
-          <p className="mt-3 leading-7 text-[#53645d]">
+          <p className="mt-3 leading-7 text-secondary-text">
             Add the details for the event you want to host.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-lg border border-[#17372f]/10 bg-white p-5 shadow-sm sm:p-8"
+          className="rounded-lg border border-border bg-white p-5 shadow-sm sm:p-8"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="sm:col-span-2">
@@ -151,7 +150,7 @@ export default function CreateEventPage() {
                 rows={5}
                 value={form.description}
                 onChange={(event) => updateField('description', event.target.value)}
-                className="w-full rounded-md border border-[#17372f]/20 bg-white px-3.5 py-3 text-base outline-none transition focus:border-[#17372f] focus:ring-2 focus:ring-[#17372f]/15"
+                className="w-full rounded-md border border-border bg-white px-3.5 py-3 text-base outline-none transition focus:border-primary-indigo focus:ring-2 focus:ring-primary-indigo/20"
               />
             </div>
 
@@ -219,7 +218,7 @@ export default function CreateEventPage() {
 
             <div className="sm:col-span-2">
               <label htmlFor="event-image" className="mb-2 block text-sm font-semibold">
-                Image URL <span className="font-normal text-[#78857f]">(optional)</span>
+                Image URL <span className="font-normal text-secondary-text">(optional)</span>
               </label>
               <input
                 id="event-image"
@@ -235,23 +234,23 @@ export default function CreateEventPage() {
           {feedback && (
             <p
               role={feedback.success ? 'status' : 'alert'}
-              className={`mt-5 text-sm font-medium ${feedback.success ? 'text-[#285447]' : 'text-[#b43f32]'}`}
+              className={`mt-5 text-sm font-medium ${feedback.success ? 'text-primary-text' : 'text-error'}`}
             >
               {feedback.message}
             </p>
           )}
 
-          <div className="mt-7 flex flex-col-reverse gap-3 border-t border-[#17372f]/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-7 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/organizer/dashboard"
-              className="inline-flex min-h-12 items-center justify-center rounded-md border border-[#17372f]/20 px-5 py-3 text-sm font-semibold transition-colors hover:bg-[#f5f7f4]"
+              className="inline-flex min-h-12 items-center justify-center rounded-md border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-white"
             >
               Return to dashboard
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex min-h-12 items-center justify-center rounded-md bg-[#17372f] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#285447] disabled:cursor-not-allowed disabled:opacity-65"
+              className="inline-flex min-h-12 items-center justify-center rounded-md bg-primary-indigo px-6 py-3 font-semibold text-white transition-colors hover:bg-light-indigo hover:text-primary-indigo hover:ring-2 hover:ring-secondary-indigo disabled:cursor-not-allowed disabled:opacity-65"
             >
               {isSubmitting ? 'Creating Event...' : 'Create Event'}
             </button>
@@ -259,9 +258,9 @@ export default function CreateEventPage() {
         </form>
       </main>
 
-      <footer className="border-t border-[#17372f]/10 bg-[#edf1ec]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-[#53645d] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-          <Link href="/" className="font-bold text-[#17372f]">EventBook</Link>
+      <footer className="border-t border-border bg-light-indigo">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-7 text-sm text-primary-text sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <EventBookLogo compact />
           <p>© 2026 EventBook. All rights reserved.</p>
         </div>
       </footer>
